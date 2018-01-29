@@ -2,7 +2,7 @@ from . import parser
 import requests
 
 
-__all__ = ['ArtistClient', 'AlbumClient', 'LyricsClient']
+__all__ = ['ArtistClient', 'AlbumClient', 'LyricsClient', 'TrackClient']
 
 
 # Global Variables for API URL
@@ -61,6 +61,20 @@ class ArtistClient(BaseClient):
         Developer Authentication token. Not currently necessary for the Musixmatch API, but
         included for future inclusion.
     """
+
+    def albums(self, artist_id, artist_mbid=None, g_album_name=True,
+               s_release_date='asc', page=0, page_size=10):
+        query = {'apikey': self.api_key,
+                 'format': 'jsonp',
+                 'callback': 'callback',
+                 'artist_id': artist_id,
+                 'artist_mbid': artist_mbid,
+                 'g_album_name': g_album_name,
+                 's_release_date': s_release_date,
+                 'page': page,
+                 'page_size': page_size}
+        response = requests.get(ARTIST_ALBUMS_URL, params=query)
+        return parser.album_list(response)
 
     def chart(self, page_size=10, page=0, country='us'):
         query = {'apikey': self.api_key,
@@ -170,7 +184,7 @@ class LyricsClient(BaseClient):
                  'callback': 'callback',
                  'track_id': track_id}
         response = requests.get(TRACK_LYRICS_URL, params=query)
-        return response
+        return parser.lyrics(response)
 
 
 class TrackClient(BaseClient):
@@ -196,7 +210,7 @@ class TrackClient(BaseClient):
                  'f_has_lyrics': f_has_lyrics,
                  'page': page,
                  'page_size': page_size}
-        response = requests.get(TRACK_LYRICS_URL, params=query)
+        response = requests.get(ALBUM_TRACKS_URL, params=query)
         return parser.track_list(response)
 
     def chart(self, page_size=10, page=0, country='us', f_has_lyrics=True):
@@ -215,8 +229,16 @@ class TrackClient(BaseClient):
                  'format': 'jsonp',
                  'callback': 'callback',
                  'album_id': album_id}
-        response = requests.get(ALBUM_URL, params=query)
+        response = requests.get(TRACK_URL, params=query)
         return parser.track(response)
+
+    def lyrics(self, track_id):
+        query = {'apikey': self.api_key,
+                 'format': 'jsonp',
+                 'callback': 'callback',
+                 'album_id': track_id}
+        response = requests.get(TRACK_LYRICS_URL, params=query)
+        return parser.lyrics(response)
 
     def match(self, q_artist=None, q_track=None, f_has_lyrics=True, f_has_subtitle=True):
         query = {'apikey': self.api_key,
@@ -226,7 +248,7 @@ class TrackClient(BaseClient):
                  'q_track': q_track,
                  'f_has_lyrics': f_has_lyrics,
                  'f_has_subtitle': f_has_subtitle}
-        response = requests.get("MATCHER_TRACK_URL", params=query)
+        response = requests.get(MATCHER_TRACK_URL, params=query)
         return parser.track(response)
 
     def search(self, q_track=None, q_artist=None, q_lyrics=None,
@@ -237,7 +259,7 @@ class TrackClient(BaseClient):
         query = {'apikey': self.api_key,
                  'format': 'jsonp',
                  'callback': 'callback',
-                 'q_track': q_track
+                 'q_track': q_track,
                  'q_artist': q_artist,
                  'q_lyrics': q_lyrics,
                  'f_lyrics_language': f_lyrics_language,
@@ -247,5 +269,5 @@ class TrackClient(BaseClient):
                  'quorum_factor': quorum_factor,
                  'page_size': page_size,
                  'page': page}
-        response = requests.get("TRACK_SEARCH_URL", params=query)
+        response = requests.get(TRACK_SEARCH_URL, params=query)
         return parser.track_list(response)

@@ -10,8 +10,7 @@ setup(
 
     packages = ['musixmatch'],
     install_requires=[
-        'requests',
-        'json'
+        'requests'
     ],
     zip_safe = False,
 )

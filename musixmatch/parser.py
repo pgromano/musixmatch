@@ -7,7 +7,7 @@ def jsonp2json(jsonp):
     except ValueError:
         print("Input is not in a jsonp format.")
         return
-    return json.reads(jsonp[l_index:r_index])
+    return json.loads(jsonp[l_index:r_index])
 
 
 def album(response):
